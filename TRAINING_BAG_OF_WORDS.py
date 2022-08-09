@@ -3,12 +3,14 @@
 Function to load training data as bag of words dataframe.
 """
 
+import numpy as np
 import pandas as pd
 import nltk
 import heapq
 from nltk.corpus import stopwords
 from sklearn.feature_extraction.text import CountVectorizer
 import time
+from nltk.tokenize import regexp
 
 def getBagOfWords( data, num_freq_words):
     concatenated_tokenized_data = []
@@ -73,8 +75,21 @@ def getBagOfWordsCountVecNoStop( data, num_freq_words):
     X = vectorizer.fit_transform(data)
     return pd.DataFrame(X.toarray(), columns=vectorizer.get_feature_names_out(), )
 
-#nltk is too specific: Case sensitive,  countVec is more generic
-def GetBOW(text_data, num_words, has_stop, nltk_or_countVec):
+
+def getBOWasFrequencies( data):
+    '''returns list of tokens as the number of times the token appears in the data set'''
+    tk = regexp.WordPunctTokenizer()
+    tokens = data.map(tk.tokenize)
+    #TODO: Vectorize BOW
+    values = pd.Series([x for item in tokens for x in item]).value_counts()
+    values = values.to_dict()
+    tokens = tokens.apply(lambda x: list(map(values.get, x)))
+    return values
+
+#nltk is too specific and inefficient, countVec is more efficient and generic.
+
+def getBOW(text_data, num_words, has_stop, nltk_or_countVec):
+    '''returns frequency of most occurent tokens in sentence.'''
     if nltk_or_countVec == "nltk":
         concatenated_tokenized_data = []
         for text in data:
@@ -117,12 +132,12 @@ def GetBOW(text_data, num_words, has_stop, nltk_or_countVec):
 
 df = pd.read_csv("TRAINING_DATA.csv")
 data = df["text"]
-getBagOfWords(data, 10)
+print(getBagOfWordsRegExpTokenizer(data, 10))
 '''
 start_time = time.time()
-print(GetBOW(data, 10, False, "countVec"))
+print(getBOW(data, 10, False, "countVec"))
 print("--- %s seconds ---" % (time.time() - start_time))
 start_time = time.time()
-print(GetBOW(data, 10, False, "nltk"))
+print(getBOW(data, 10, False, "nltk"))
 print("--- %s seconds ---" % (time.time() - start_time))
 '''
