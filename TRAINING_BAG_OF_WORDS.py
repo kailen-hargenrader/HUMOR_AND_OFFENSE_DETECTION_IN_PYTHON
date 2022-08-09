@@ -84,12 +84,15 @@ def getBOWasFrequencies( data):
     values = pd.Series([x for item in tokens for x in item]).value_counts()
     values = values.to_dict()
     tokens = tokens.apply(lambda x: list(map(values.get, x)))
-    return values
+    return tokens
 
-#nltk is too specific and inefficient, countVec is more efficient and generic.
+
 
 def getBOW(text_data, num_words, has_stop, nltk_or_countVec):
-    '''returns frequency of most occurent tokens in sentence.'''
+    '''returns frequency of most occurent tokens in sentence. 
+    
+    nltk is too specific and inefficient, countVec is more efficient and 
+    generic.'''
     if nltk_or_countVec == "nltk":
         concatenated_tokenized_data = []
         for text in data:
@@ -132,7 +135,7 @@ def getBOW(text_data, num_words, has_stop, nltk_or_countVec):
 
 df = pd.read_csv("TRAINING_DATA.csv")
 data = df["text"]
-print(getBagOfWordsRegExpTokenizer(data, 10))
+print(getBOWasFrequencies(data))
 '''
 start_time = time.time()
 print(getBOW(data, 10, False, "countVec"))
