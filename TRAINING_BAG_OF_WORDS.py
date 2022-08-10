@@ -3,7 +3,7 @@
 Function to load training data as bag of words dataframe.
 """
 
-import numpy as np
+
 import pandas as pd
 import nltk
 import heapq
@@ -80,11 +80,10 @@ def getBOWasFrequencies( data):
     '''returns list of tokens as the number of times the token appears in the data set'''
     tk = regexp.WordPunctTokenizer()
     tokens = data.map(tk.tokenize)
-    #TODO: Vectorize BOW
     values = pd.Series([x for item in tokens for x in item]).value_counts()
     values = values.to_dict()
     tokens = tokens.apply(lambda x: list(map(values.get, x)))
-    return tokens
+    return tokens, values
 
 
 
@@ -95,7 +94,7 @@ def getBOW(text_data, num_words, has_stop, nltk_or_countVec):
     generic.'''
     if nltk_or_countVec == "nltk":
         concatenated_tokenized_data = []
-        for text in data:
+        for text in text_data:
             tokenized_text = nltk.word_tokenize(text)
             if(has_stop):
                 concatenated_tokenized_data +=tokenized_text
@@ -115,32 +114,34 @@ def getBOW(text_data, num_words, has_stop, nltk_or_countVec):
                 
         most_freq = heapq.nlargest(num_words, word_freq, key=word_freq.get)
         sentence_vecs = []
-        for text in data:
+        for text in text_data:
             tokens = nltk.word_tokenize(text)
             sentence_vec = []
             for word in most_freq:
                 sentence_vec.append(tokens.count(word))
                 
             sentence_vecs.append(sentence_vec)
-        return pd.DataFrame(sentence_vecs, columns=most_freq)
+            BOW = pd.DataFrame(sentence_vecs, columns=most_freq)
+        return BOW, BOW.columns 
     elif nltk_or_countVec == "countVec":
         if(has_stop):
             vectorizer = CountVectorizer(max_features=num_words)
         else:
             vectorizer = CountVectorizer(max_features=num_words, stop_words='english')
-        X = vectorizer.fit_transform(data)
-        return pd.DataFrame(X.toarray(), columns=vectorizer.get_feature_names_out(), )
+        X = vectorizer.fit_transform(text_data)
+        BOW = pd.DataFrame(X.toarray(), columns=vectorizer.get_feature_names_out())
+        return BOW, vectorizer
     else:
         raise ValueError("must choose nltk or countVec.")
 
+            
+'''   
 df = pd.read_csv("TRAINING_DATA.csv")
 data = df["text"]
-print(getBOWasFrequencies(data))
-'''
 start_time = time.time()
-print(getBOW(data, 10, False, "countVec"))
+print(getBOW(data, 200, False, "countVec"))
 print("--- %s seconds ---" % (time.time() - start_time))
 start_time = time.time()
-print(getBOW(data, 10, False, "nltk"))
+print(getBOWasFrequencies(data))
 print("--- %s seconds ---" % (time.time() - start_time))
 '''
