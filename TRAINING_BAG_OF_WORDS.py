@@ -68,16 +68,20 @@ def getBagOfWordsNoStop( data, num_freq_words):
 def getBagOfWordsCountVec( data, num_freq_words):
     vectorizer = CountVectorizer(max_features=num_freq_words)
     X = vectorizer.fit_transform(data)
-    return pd.DataFrame(X.toarray(), columns=vectorizer.get_feature_names_out(), )
+    return pd.DataFrame(X.toarray(), 
+                        columns=vectorizer.get_feature_names_out())
 
 def getBagOfWordsCountVecNoStop( data, num_freq_words):
-    vectorizer = CountVectorizer(max_features=num_freq_words, stop_words='english')
+    vectorizer = CountVectorizer(max_features=num_freq_words,
+                                 stop_words='english')
     X = vectorizer.fit_transform(data)
-    return pd.DataFrame(X.toarray(), columns=vectorizer.get_feature_names_out(), )
+    return pd.DataFrame(X.toarray(), 
+                        columns=vectorizer.get_feature_names_out())
 
 
 def getBOWasFrequencies( data):
-    '''returns list of tokens as the number of times the token appears in the data set'''
+    '''returns list of tokens as the number of times the token appears in the 
+    data set'''
     tk = regexp.WordPunctTokenizer()
     tokens = data.map(tk.tokenize)
     values = pd.Series([x for item in tokens for x in item]).value_counts()
@@ -127,9 +131,11 @@ def getBOW(text_data, num_words, has_stop, nltk_or_countVec):
         if(has_stop):
             vectorizer = CountVectorizer(max_features=num_words)
         else:
-            vectorizer = CountVectorizer(max_features=num_words, stop_words='english')
+            vectorizer = CountVectorizer(max_features=num_words, 
+                                         stop_words='english')
         X = vectorizer.fit_transform(text_data)
-        BOW = pd.DataFrame(X.toarray(), columns=vectorizer.get_feature_names_out())
+        BOW = pd.DataFrame(X.toarray(),
+                           columns=vectorizer.get_feature_names_out())
         return BOW, vectorizer
     else:
         raise ValueError("must choose nltk or countVec.")
